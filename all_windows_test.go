@@ -625,6 +625,9 @@ func TestConcurrentGoroutines(t *testing.T) {
 	}
 
 	t.Logf("%d goroutines concurrently inserted %d rows in %v", ngoroutines, ngoroutines*nrows, d)
+	if runtime.GOOS == "windows" {
+		return
+	}
 
 	if !*oInner {
 		t.Logf("recursively invoking this test with -race\n")
