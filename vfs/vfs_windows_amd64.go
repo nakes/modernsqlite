@@ -6,6 +6,7 @@ import (
 	"math"
 	"reflect"
 	"sync/atomic"
+	"time"
 	"unsafe"
 
 	"modernc.org/libc"
@@ -1261,25 +1262,7 @@ type VFSFile1 = struct {
 type VFSFile = VFSFile1
 
 func vfsDirectWrite(tls *libc.TLS, p uintptr, zBuf uintptr, iAmt int32, iOfst sqlite_int64) int32 {
-	bp := tls.Alloc(16)
-	defer tls.Free(16)
-
-	var ofst off_t
-	var nWrite size_t
-
-	libc.X__builtin_printf(tls, ts, libc.VaList(bp, uintptr(unsafe.Pointer(&__func__)), 180))
-	libc.X__builtin_abort(tls)
-	ofst = libc.Xlseek(tls, (*VFSFile)(unsafe.Pointer(p)).fd, iOfst, 0)
-	if ofst != iOfst {
-		return 10 | int32(3)<<8
-	}
-
-	nWrite = size_t(libc.Xwrite(tls, (*VFSFile)(unsafe.Pointer(p)).fd, zBuf, uint32(iAmt)))
-	if nWrite != size_t(iAmt) {
-		return 10 | int32(3)<<8
-	}
-
-	return 0
+	panic("not implemeneted")
 }
 
 var __func__ = *(*[15]int8)(unsafe.Pointer(ts + 13))
@@ -1353,26 +1336,7 @@ func vfsTruncate(tls *libc.TLS, pFile uintptr, size sqlite_int64) int32 {
 }
 
 func vfsSync(tls *libc.TLS, pFile uintptr, flags int32) int32 {
-	bp := tls.Alloc(16)
-	defer tls.Free(16)
-
-	libc.X__builtin_printf(tls, ts, libc.VaList(bp, uintptr(unsafe.Pointer(&__func__5)), 333))
-	libc.X__builtin_abort(tls)
-	var p uintptr = pFile
-	var rc int32
-
-	rc = vfsFlushBuffer(tls, p)
-	if rc != 0 {
-		return rc
-	}
-
-	rc = libc.Xfsync(tls, (*VFSFile)(unsafe.Pointer(p)).fd)
-	return func() int32 {
-		if rc == 0 {
-			return 0
-		}
-		return 10 | int32(4)<<8
-	}()
+	panic("not implemeneted")
 }
 
 var __func__5 = *(*[8]int8)(unsafe.Pointer(ts + 104))
@@ -1403,42 +1367,7 @@ func vfsDeviceCharacteristics(tls *libc.TLS, pFile uintptr) int32 {
 }
 
 func vfsDelete(tls *libc.TLS, pVfs uintptr, zPath uintptr, dirSync int32) int32 {
-	bp := tls.Alloc(4129)
-	defer tls.Free(4129)
-
-	libc.X__builtin_printf(tls, ts, libc.VaList(bp, uintptr(unsafe.Pointer(&__func__8)), 475))
-	libc.X__builtin_abort(tls)
-	var rc int32
-
-	rc = libc.Xunlink(tls, zPath)
-	if rc != 0 && *(*int32)(unsafe.Pointer(libc.X__errno_location(tls))) == 2 {
-		return 0
-	}
-
-	if rc == 0 && dirSync != 0 {
-		var dfd int32
-		var i int32
-
-		sqlite3.Xsqlite3_snprintf(tls, 4096, bp+32, ts+112, libc.VaList(bp+16, zPath))
-		*(*int8)(unsafe.Pointer(bp + 32 + 4096)) = int8(0)
-		for i = int32(libc.Xstrlen(tls, bp+32)); i > 1 && int32(*(*int8)(unsafe.Pointer(bp + 32 + uintptr(i)))) != '/'; i++ {
-		}
-		*(*int8)(unsafe.Pointer(bp + 32 + uintptr(i))) = int8(0)
-
-		dfd = libc.Xopen(tls, bp+32, 00, libc.VaList(bp+24, 0))
-		if dfd < 0 {
-			rc = -1
-		} else {
-			rc = libc.Xfsync(tls, dfd)
-			libc.Xclose(tls, dfd)
-		}
-	}
-	return func() int32 {
-		if rc == 0 {
-			return 0
-		}
-		return 10 | int32(10)<<8
-	}()
+	panic("not implemeneted")
 }
 
 var __func__8 = *(*[10]int8)(unsafe.Pointer(ts + 115))
@@ -1465,14 +1394,12 @@ func vfsRandomness(tls *libc.TLS, pVfs uintptr, nByte int32, zByte uintptr) int3
 }
 
 func vfsSleep(tls *libc.TLS, pVfs uintptr, nMicro int32) int32 {
-	libc.Xsleep(tls, uint32(nMicro/1000000))
-	libc.Xusleep(tls, uint32(nMicro%1000000))
+	time.Sleep(time.Duration(nMicro) * time.Microsecond)
 	return nMicro
 }
 
 func vfsCurrentTime(tls *libc.TLS, pVfs uintptr, pTime uintptr) int32 {
-	var t time_t = libc.Xtime(tls, uintptr(0))
-	*(*float64)(unsafe.Pointer(pTime)) = float64(t)/86400.0 + 2440587.5
+	*(*float64)(unsafe.Pointer(pTime)) = float64(time.Now().Unix())/86400.0 + 2440587.5
 	return 0
 }
 

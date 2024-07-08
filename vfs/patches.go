@@ -100,7 +100,7 @@ func vfsRead(tls *libc.TLS, pFile uintptr, zBuf uintptr, iAmt int32, iOfst sqlit
 		return sqlite3.SQLITE_IOERR_READ
 	}
 
-	b := (*libc.RawMem)(unsafe.Pointer(zBuf))[:iAmt]
+	b := unsafe.Slice((*byte)(unsafe.Pointer(zBuf)), iAmt)
 	n, err := f.Read(b)
 	if n == int(iAmt) {
 		return sqlite3.SQLITE_OK
