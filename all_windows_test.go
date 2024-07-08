@@ -120,19 +120,14 @@ func testMain(m *testing.M) int {
 	return m.Run()
 }
 
-func tempDB(t testing.TB) (string, *sql.DB) {
-	dir, err := os.MkdirTemp("", "sqlite-test-")
-	if err != nil {
-		t.Fatal(err)
-	}
-
+func tempDB(t testing.TB) *sql.DB {
+	dir := t.TempDir()
 	db, err := sql.Open(driverName, filepath.Join(dir, "tmp.db"))
 	if err != nil {
-		os.RemoveAll(dir)
 		t.Fatal(err)
 	}
 
-	return dir, db
+	return db
 }
 
 // https://gitlab.com/cznic/sqlite/issues/100
@@ -171,11 +166,10 @@ func TestIssue100(t *testing.T) {
 
 // https://gitlab.com/cznic/sqlite/issues/98
 func TestIssue98(t *testing.T) {
-	dir, db := tempDB(t)
+	db := tempDB(t)
 
 	defer func() {
 		db.Close()
-		os.RemoveAll(dir)
 	}()
 
 	if _, err := db.Exec("create table t(b mediumblob not null)"); err != nil {
@@ -218,11 +212,10 @@ func TestIssue97(t *testing.T) {
 }
 
 func TestScalar(t *testing.T) {
-	dir, db := tempDB(t)
+	db := tempDB(t)
 
 	defer func() {
 		db.Close()
-		os.RemoveAll(dir)
 	}()
 
 	t1 := time.Date(2017, 4, 20, 1, 2, 3, 56789, time.UTC)
@@ -286,11 +279,10 @@ func TestScalar(t *testing.T) {
 }
 
 func TestBlob(t *testing.T) {
-	dir, db := tempDB(t)
+	db := tempDB(t)
 
 	defer func() {
 		db.Close()
-		os.RemoveAll(dir)
 	}()
 
 	b1 := []byte(time.Now().String())
@@ -458,11 +450,10 @@ func BenchmarkNextMemory(b *testing.B) {
 // https://gitlab.com/cznic/sqlite/issues/11
 func TestIssue11(t *testing.T) {
 	const N = 6570
-	dir, db := tempDB(t)
+	db := tempDB(t)
 
 	defer func() {
 		db.Close()
-		os.RemoveAll(dir)
 	}()
 
 	if _, err := db.Exec(`
@@ -625,10 +616,6 @@ func TestConcurrentGoroutines(t *testing.T) {
 	}
 
 	t.Logf("%d goroutines concurrently inserted %d rows in %v", ngoroutines, ngoroutines*nrows, d)
-	if runtime.GOOS == "windows" {
-		return
-	}
-
 	if !*oInner {
 		t.Logf("recursively invoking this test with -race\n")
 		ctx, cancel := context.WithTimeout(context.Background(), time.Hour)

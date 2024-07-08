@@ -9,16 +9,14 @@ package sqlite // import "modernc.org/sqlite"
 
 import (
 	"database/sql"
-	"os"
 	"reflect"
 	"testing"
 )
 
 func TestNamedParameters(t *testing.T) {
-	dir, db := tempDB(t)
+	db := tempDB(t)
 	defer func() {
 		db.Close()
-		os.RemoveAll(dir)
 	}()
 
 	_, err := db.Exec(`
