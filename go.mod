@@ -4,11 +4,11 @@ go 1.20
 
 require (
 	github.com/google/pprof v0.0.0-20240409012703-83162a5b38cd
+	github.com/klauspost/cpuid/v2 v2.2.7
 	golang.org/x/sys v0.19.0
 	modernc.org/fileutil v1.3.0
 	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6
-	modernc.org/libc v1.54.2
-	modernc.org/libkernel32 v0.1.2
+	modernc.org/libc v1.52.1
 	modernc.org/mathutil v1.6.0
 )
 

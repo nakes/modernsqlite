@@ -43,8 +43,8 @@ build_all_targets:
 	GOOS=openbsd GOARCH=amd64 go build -v ./...
 	GOOS=openbsd GOARCH=arm64 go test -c -o /dev/null
 	GOOS=openbsd GOARCH=arm64 go build -v ./...
-	GOOS=windows GOARCH=386 go test -c -o /dev/null
-	GOOS=windows GOARCH=386 go build -v ./...
+	# GOOS=windows GOARCH=386 go test -c -o /dev/null
+	# GOOS=windows GOARCH=386 go build -v ./...
 	GOOS=windows GOARCH=amd64 go test -c -o /dev/null
 	GOOS=windows GOARCH=amd64 go build -v ./...
 	GOOS=windows GOARCH=arm64 go test -c -o /dev/null
@@ -66,7 +66,7 @@ editor:
 	go build -o /dev/null vendor_libsqlite3.go
 
 test:
-	go test -v -timeout 24h 2>&1 | tee log-test
+	go test -v -timeout 24h  . ./functest 2>&1 | tee log-test
 	
 vendor:
 	go run vendor_libsqlite3.go && make build_all_targets
@@ -79,11 +79,7 @@ work:
 	go work use ../cc/v4
 	go work use ../ccgo/v3
 	go work use ../ccgo/v4
-	go work use ../libadvapi32
 	go work use ../libc
-	go work use ../libkernel32
-	go work use ../libsqlite3
 	go work use ../libtcl8.6
-	go work use ../libuser32
-	go work use ../libws2_32
+	go work use ../libsqlite3
 	go work use ../libz

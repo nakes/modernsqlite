@@ -926,7 +926,7 @@ func (c *conn) columnBlob(pstmt uintptr, iCol int) (v []byte, err error) {
 	}
 
 	v = make([]byte, len)
-	copy(v, unsafe.Slice((*byte)(unsafe.Pointer(p)), len))
+	copy(v, (*libc.RawMem)(unsafe.Pointer(p))[:len:len])
 	return v, nil
 }
 
@@ -953,7 +953,7 @@ func (c *conn) columnText(pstmt uintptr, iCol int) (v string, err error) {
 	}
 
 	b := make([]byte, len)
-	copy(b, unsafe.Slice((*byte)(unsafe.Pointer(p)), len))
+	copy(b, (*libc.RawMem)(unsafe.Pointer(p))[:len:len])
 	return string(b), nil
 }
 
@@ -1758,7 +1758,7 @@ func (c *conn) Serialize() (v []byte, err error) {
 	}
 
 	v = make([]byte, bufLen)
-	copy(v, unsafe.Slice((*byte)(unsafe.Pointer(pBuf)), bufLen))
+	copy(v, (*libc.RawMem)(unsafe.Pointer(pBuf))[:bufLen:bufLen])
 	return v, nil
 }
 
@@ -1767,7 +1767,7 @@ func (c *conn) Deserialize(buf []byte) (err error) {
 	bufLen := len(buf)
 	pBuf := c.tls.Alloc(bufLen) // free will be done if it fails or on close, must not be freed here
 
-	copy(unsafe.Slice((*byte)(unsafe.Pointer(pBuf)), bufLen), buf)
+	copy((*libc.RawMem)(unsafe.Pointer(pBuf))[:bufLen:bufLen], buf)
 
 	zSchema := sqlite3.Xsqlite3_db_name(c.tls, c.db, 0)
 	if zSchema == 0 {
@@ -2183,7 +2183,7 @@ func functionArgs(tls *libc.TLS, argc int32, argv uintptr) []driver.Value {
 			size := sqlite3.Xsqlite3_value_bytes(tls, valPtr)
 			blobPtr := sqlite3.Xsqlite3_value_blob(tls, valPtr)
 			v := make([]byte, size)
-			copy(v, unsafe.Slice((*byte)(unsafe.Pointer(blobPtr)), size))
+			copy(v, (*libc.RawMem)(unsafe.Pointer(blobPtr))[:size:size])
 			args[i] = v
 		default:
 			panic(fmt.Sprintf("unexpected argument type %q passed by sqlite", valType))
@@ -2224,7 +2224,7 @@ func functionReturnValue(tls *libc.TLS, ctx uintptr, res driver.Value) error {
 			panic(fmt.Sprintf("unable to allocate space for blob: %d", size))
 		}
 		defer libc.Xfree(tls, p)
-		copy(unsafe.Slice((*byte)(unsafe.Pointer(p)), size), resTyped)
+		copy((*libc.RawMem)(unsafe.Pointer(p))[:size:size], resTyped)
 
 		sqlite3.Xsqlite3_result_blob(tls, ctx, p, size, sqlite3.SQLITE_TRANSIENT)
 	default:

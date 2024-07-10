@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build !(linux && (amd64 || arm64 || loong64) || windows)
+//go:build !(linux && (amd64 || arm64 || loong64))
 
 package sqlite // import "modernc.org/sqlite"
 
 import (
 	"unsafe"
 
+	"modernc.org/libc"
 	sqlite3 "modernc.org/sqlite/lib"
 )
 
@@ -28,7 +29,7 @@ func (c *conn) bindBlob(pstmt uintptr, idx1 int, value []byte) (uintptr, error) 
 		return 0, err
 	}
 	if len(value) != 0 {
-		copy(unsafe.Slice((*byte)(unsafe.Pointer(p)), len(value)), value)
+		copy((*libc.RawMem)(unsafe.Pointer(p))[:len(value):len(value)], value)
 	}
 	if rc := sqlite3.Xsqlite3_bind_blob(c.tls, pstmt, int32(idx1), p, int32(len(value)), 0); rc != sqlite3.SQLITE_OK {
 		c.free(p)

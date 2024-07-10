@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build !windows
-
 package sqlite // import "modernc.org/sqlite"
 
 import (
@@ -125,14 +123,19 @@ func testMain(m *testing.M) int {
 	return m.Run()
 }
 
-func tempDB(t testing.TB) *sql.DB {
-	dir := t.TempDir()
-	db, err := sql.Open(driverName, filepath.Join(dir, "tmp.db"))
+func tempDB(t testing.TB) (string, *sql.DB) {
+	dir, err := os.MkdirTemp("", "sqlite-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	return db
+	db, err := sql.Open(driverName, filepath.Join(dir, "tmp.db"))
+	if err != nil {
+		os.RemoveAll(dir)
+		t.Fatal(err)
+	}
+
+	return dir, db
 }
 
 // https://gitlab.com/cznic/sqlite/issues/118
@@ -240,10 +243,11 @@ func TestIssue100(t *testing.T) {
 
 // https://gitlab.com/cznic/sqlite/issues/98
 func TestIssue98(t *testing.T) {
-	db := tempDB(t)
+	dir, db := tempDB(t)
 
 	defer func() {
 		db.Close()
+		os.RemoveAll(dir)
 	}()
 
 	if _, err := db.Exec("create table t(b mediumblob not null)"); err != nil {
@@ -286,10 +290,11 @@ func TestIssue97(t *testing.T) {
 }
 
 func TestScalar(t *testing.T) {
-	db := tempDB(t)
+	dir, db := tempDB(t)
 
 	defer func() {
 		db.Close()
+		os.RemoveAll(dir)
 	}()
 
 	t1 := time.Date(2017, 4, 20, 1, 2, 3, 56789, time.UTC)
@@ -353,10 +358,11 @@ func TestScalar(t *testing.T) {
 }
 
 func TestBlob(t *testing.T) {
-	db := tempDB(t)
+	dir, db := tempDB(t)
 
 	defer func() {
 		db.Close()
+		os.RemoveAll(dir)
 	}()
 
 	b1 := []byte(time.Now().String())
@@ -524,10 +530,11 @@ func BenchmarkNextMemory(b *testing.B) {
 // https://gitlab.com/cznic/sqlite/issues/11
 func TestIssue11(t *testing.T) {
 	const N = 6570
-	db := tempDB(t)
+	dir, db := tempDB(t)
 
 	defer func() {
 		db.Close()
+		os.RemoveAll(dir)
 	}()
 
 	if _, err := db.Exec(`
