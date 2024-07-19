@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package functest // modernc.org/sqlite/functest
+package sqlite // import "modernc.org/sqlite"
 
 import (
 	"bytes"
@@ -20,8 +20,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	sqlite3 "modernc.org/sqlite"
 )
 
 var finalCalled bool
@@ -31,7 +29,7 @@ type sumFunction struct {
 	finalCalled *bool
 }
 
-func (f *sumFunction) Step(ctx *sqlite3.FunctionContext, args []driver.Value) error {
+func (f *sumFunction) Step(ctx *FunctionContext, args []driver.Value) error {
 	switch resTyped := args[0].(type) {
 	case int64:
 		f.sum += resTyped
@@ -41,7 +39,7 @@ func (f *sumFunction) Step(ctx *sqlite3.FunctionContext, args []driver.Value) er
 	return nil
 }
 
-func (f *sumFunction) WindowInverse(ctx *sqlite3.FunctionContext, args []driver.Value) error {
+func (f *sumFunction) WindowInverse(ctx *FunctionContext, args []driver.Value) error {
 	switch resTyped := args[0].(type) {
 	case int64:
 		f.sum -= resTyped
@@ -51,83 +49,83 @@ func (f *sumFunction) WindowInverse(ctx *sqlite3.FunctionContext, args []driver.
 	return nil
 }
 
-func (f *sumFunction) WindowValue(ctx *sqlite3.FunctionContext) (driver.Value, error) {
+func (f *sumFunction) WindowValue(ctx *FunctionContext) (driver.Value, error) {
 	return f.sum, nil
 }
 
-func (f *sumFunction) Final(ctx *sqlite3.FunctionContext) {
+func (f *sumFunction) Final(ctx *FunctionContext) {
 	*f.finalCalled = true
 }
 
 func init() {
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"test_int64",
 		0,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			return int64(42), nil
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"test_float64",
 		0,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			return float64(1e-2), nil
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"test_null",
 		0,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			return nil, nil
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"test_error",
 		0,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			return nil, errors.New("boom")
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"test_empty_byte_slice",
 		0,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			return []byte{}, nil
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"test_nonempty_byte_slice",
 		0,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			return []byte("abcdefg"), nil
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"test_empty_string",
 		0,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			return "", nil
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"test_nonempty_string",
 		0,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			return "abcdefg", nil
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"yesterday",
 		1,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			var arg time.Time
 			switch argTyped := args[0].(type) {
 			case int64:
@@ -140,10 +138,10 @@ func init() {
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"md5",
 		1,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			var arg *bytes.Buffer
 			switch argTyped := args[0].(type) {
 			case string:
@@ -161,10 +159,10 @@ func init() {
 		},
 	)
 
-	sqlite3.MustRegisterDeterministicScalarFunction(
+	MustRegisterDeterministicScalarFunction(
 		"regexp",
 		2,
-		func(ctx *sqlite3.FunctionContext, args []driver.Value) (driver.Value, error) {
+		func(ctx *FunctionContext, args []driver.Value) (driver.Value, error) {
 			var s1 string
 			var s2 string
 
@@ -193,26 +191,26 @@ func init() {
 		},
 	)
 
-	sqlite3.MustRegisterFunction("test_sum", &sqlite3.FunctionImpl{
+	MustRegisterFunction("test_sum", &FunctionImpl{
 		NArgs:         1,
 		Deterministic: true,
-		MakeAggregate: func(ctx sqlite3.FunctionContext) (sqlite3.AggregateFunction, error) {
+		MakeAggregate: func(ctx FunctionContext) (AggregateFunction, error) {
 			return &sumFunction{finalCalled: &finalCalled}, nil
 		},
 	})
 
-	sqlite3.MustRegisterFunction("test_aggregate_error", &sqlite3.FunctionImpl{
+	MustRegisterFunction("test_aggregate_error", &FunctionImpl{
 		NArgs:         1,
 		Deterministic: true,
-		MakeAggregate: func(ctx sqlite3.FunctionContext) (sqlite3.AggregateFunction, error) {
+		MakeAggregate: func(ctx FunctionContext) (AggregateFunction, error) {
 			return nil, errors.New("boom")
 		},
 	})
 
-	sqlite3.MustRegisterFunction("test_aggregate_null_pointer", &sqlite3.FunctionImpl{
+	MustRegisterFunction("test_aggregate_null_pointer", &FunctionImpl{
 		NArgs:         1,
 		Deterministic: true,
-		MakeAggregate: func(ctx sqlite3.FunctionContext) (sqlite3.AggregateFunction, error) {
+		MakeAggregate: func(ctx FunctionContext) (AggregateFunction, error) {
 			return nil, nil
 		},
 	})
@@ -675,8 +673,8 @@ func TestRegisteredFunctions(t *testing.T) {
 
 	t.Run("backup and restore", func(tt *testing.T) {
 		type backuper interface {
-			NewBackup(string) (*sqlite3.Backup, error)
-			NewRestore(string) (*sqlite3.Backup, error)
+			NewBackup(string) (*Backup, error)
+			NewRestore(string) (*Backup, error)
 		}
 
 		tmpDir, err := os.MkdirTemp(os.TempDir(), "storetest_")
@@ -758,8 +756,8 @@ func TestRegisteredFunctions(t *testing.T) {
 
 	t.Run("backup, commit and close", func(tt *testing.T) {
 		type backuper interface {
-			NewBackup(string) (*sqlite3.Backup, error)
-			NewRestore(string) (*sqlite3.Backup, error)
+			NewBackup(string) (*Backup, error)
+			NewRestore(string) (*Backup, error)
 		}
 
 		tmpDir, err := os.MkdirTemp(os.TempDir(), "storetest_")
