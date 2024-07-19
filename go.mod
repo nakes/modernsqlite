@@ -7,7 +7,7 @@ require (
 	golang.org/x/sys v0.22.0
 	modernc.org/fileutil v1.3.0
 	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6
-	modernc.org/libc v1.55.2
+	modernc.org/libc v1.55.3
 	modernc.org/mathutil v1.6.0
 )
 
