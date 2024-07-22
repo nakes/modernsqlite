@@ -32,7 +32,7 @@
 //	linux	riscv64 3.46.0
 //	linux	s390x   3.46.0
 //	windows	386     3.46.0
-//	windows	arm64   3.46.0
+//	windows	amd64   3.46.0
 //	windows	arm64   3.46.0
 //
 // # Builders
